@@ -1,339 +1,474 @@
-#include<bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <conio.h>
+#include<vector>
 using namespace std;
-/*
-Airline flight reservation system (online booking of tickets in different flights for different destinations all over the world, cancellation of tickets, clear display of cancellation amount, refund of amount after cancellation, showing  availability of all flights, showing flights timings for all 7 days of a week, seats availability, seat selection for travelers by giving the complete layout of the seating arrangement inside the flights, food availability/non-availability inside the flights, change of travel dates and amount charged.)
-*/
-
-//To store the total number of seats in the flight
-int total_number_of_seats=100;
-//To store if seat is booked or not, seat booked = -1, seat unbooked = 0
-int seats[100] = {0};	
-
-bool taken_seat = false;
-
-//To store the number of seats booked till now
-int reserve_seats = 1000;
-
-//To store the number of cancelled tickets booked till now
-int cancel_tickets = 0;
-
-class Flight{
-	public : 
-	   Flight()
-	   {
-		  start = NULL;
-	   }
-	   void book_ticket();
-	   void cancel_ticket();
-	   void change_reservation();
-	   void passenger_details();
-	   void get_booking_details();
-
-	private : 
-	   //To store details of passenger
-	   struct passenger
-	   {
-		string fname;
-		string lname;
-		string ID;
-		string phone_number;
-		string food_menu;
-		int seat_number;
-		int reservation_number;
-		passenger *next;
-	   };
-	   //To denote the start of linked list of passengers
-	   passenger *start;
-
-	   //Temporary pointers
-	   passenger *temp_passenger;
-	   passenger *temp1;
-}flight;	//flight is object of class Flight
-
-void allocate_seat_number(int snumber)
+int total_saving_accounts = 0;
+int total_current_accounts = 0;
+class account
 {
-    for (int i = 0; i < total_number_of_seats; i++ )
+    public :
+    string name_of_account_holder;
+    string name_of_joint_account_holder;
+    long long int account_number;
+    int balance;
+    // int withdraw;
+    // int deposit;
+    string type_of_account;
+    string pin;
+    public :
+    //In case of single holder account
+    account(string accholdername,int bal,string typeofacc,string pc)
     {
-            if( seats[i] == -1 )
-            {
-			taken_seat=true;
-  	             cout << "The seat is taken already. \n";
-                    cout << "Please choose another seat number from below."<<endl;
-			int j = 1;
-			while ( j < total_number_of_seats+1 )
-			{
-				if ( seats[j-1] == -1)
-				j++;
-				else
-				{
-					cout <<"|" << j << "|";
-					if ( j%10 == 0 )
-					cout << endl;
-					j++;
-				}
-			}
-		}
+        account_number = rand()%100000 + 1000000000;
+        name_of_account_holder = accholdername;
+        balance = bal;
+        type_of_account = typeofacc;
+        pin = pc;
+        name_of_joint_account_holder = "No Joint Holder in this account";
+    }
+    //In case of multiple holder account
+    account(string accholdername,string jointholdername,int bal,string typeofacc,string pc)
+    {
+        account_number = rand()%100000 + 1000000000;
+        name_of_account_holder = accholdername;
+        name_of_joint_account_holder = jointholdername;
+        balance = bal;
+        type_of_account = typeofacc;
+        pin = pc;
+    }
+};
+vector<account>accts;
+
+void display_details(long long int accnum)
+{
+    bool acc_exists = false;
+    for(auto it : accts)
+    {
+        if(it.account_number==accnum)
+        {
+            acc_exists = true;
+            cout<<"\nAccount Number : "<<it.account_number;
+            cout<<"\nAccount Holder Name : "<<it.name_of_account_holder;
+            cout<<"\nJoint Holder Name : "<<it.name_of_joint_account_holder;
+            cout<<"\nBalance in your account : "<<it.balance;
+            cout<<"\nType of Account : "<<it.type_of_account;
+        }
+    }
+    if(acc_exists == false){
+    cout<<"Account doesn't exists with given Account Number.";
+    exit(0);
     }
 }
 
-void Flight :: book_ticket()
+bool create_account(vector<account>&accts)
 {
-	//To store the details of passenger
-	temp_passenger = new passenger;
-	cout << "Enter your first name: ";
-	cin >> temp_passenger->fname;
-	cout << "Enter your last name: ";
-	cin >> temp_passenger->lname;
-	cout << "Enter your ID: ";
-	cin >> temp_passenger->ID;
-	cout << "Enter your phone number: ";
-	cin >> temp_passenger->phone_number;
-	int snumber;
-	do{
-		cout<<"Enter the seat number : ";
-		cin>>snumber;
-		while(snumber>total_number_of_seats)
-		{
-			cout<<"Invalid seat number, enter again : ";
-			cin>>snumber;
-		}
-		if(seats[snumber-1]>-1)
-		{
-			taken_seat = false;
-		}
-		else 
-		allocate_seat_number(snumber);
+    system("cls");
+    string accholder_name;
+    cout<<"\nENTER YOUR DETAILS HERE : ";
+    cout<<"\nName of Account Holder : ";
+    cin>>accholder_name;
+    string str;
+    cout<<"\nDo you want to have joint holder account? Type YES/NO : ";
+    cin>>str;
+    string joint_holder;
+    if(str=="YES")
+    {
+        cout<<"Enter the name of Joint Holder : ";
+        cin>>joint_holder;
+    }
+    string pin;
+    cout<<"\nEnter the pin : ";
+    cin>>pin;
+    string typeofacc;
+    cout<<"\nEnter the type of account : ";
+    int choice;
+    cout<<"1 - Savings Account\n";
+    cout<<"2 - Current Account\n";
+    cout<<"Enter your choice here : ";
+    cin>>choice;
+    if(choice==1)
+     typeofacc =  "Savings";
+    else
+     typeofacc = "Current";
 
-		seats[snumber-1] = -1;
-		temp_passenger->seat_number = snumber;
+    int balance;
+    cout<<"\nEnter the balance you want to have initially in your account : ";
+    cin>>balance;
 
-	}while(taken_seat == true);
+         //========SINGLE HOLDER ACCOUNT===========//
+
+    //If it is savings account
+    if(typeofacc=="Savings" && str == "YES"){
+    account ob(accholder_name,joint_holder,balance,typeofacc,pin);
+    total_saving_accounts++;
+    accts.push_back(ob);
+    std::cout << "\t\t|-----------------------------------------------|" << "\n";; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|     ACCOUNT CREATED SUCCESSFULLY              |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+    display_details(ob.account_number);
+    return true;
+    }
+    //If it is current account and balance is insufficient
+    if(typeofacc=="Current" && balance < 10000 && str == "YES")
+    {
+    std::cout << "\t\t|-----------------------------------------------|" << "\n";; 
+	std::cout << "\t\t|     INSUFFICIENT BALANCE                      |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+    return false;
+    }
+    //Current account with sufficient balance
+    else{
+    account ob(accholder_name,joint_holder,balance,typeofacc,pin);
+    accts.push_back(ob);
+    total_current_accounts++;
+    std::cout << "\t\t|-----------------------------------------------|" << "\n";; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|     ACCOUNT CREATED SUCCESSFULLY              |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+    display_details(ob.account_number);
+    return true;
+    }
 
 
-	cout << "Enter your food choice preference : ";
-	cout<< "1. Veg" << endl;
-	cout<< "2. Non-Veg" << endl;
-	cout<< "3. No Food" << endl;
-	int choice;
-	cout<<"Your choice : ";
-	cin>>choice;
-	while(choice>3 || choice<1)
-	{
-		cout<<"Invalid choice, enter again : ";
-		cin>>choice;
-	}
+        //========JOINT HOLDER ACCOUNT===========//
 
-	if(choice==1)
-	{
-		temp_passenger->food_menu = "Veg";
-	}
-	else if(choice==2)
-	{
-		temp_passenger->food_menu = "Non-Veg";
-	}
-	else
-	{
-		temp_passenger->food_menu = "No Food";
-	}
-	temp_passenger->next = NULL;
-	
-	reserve_seats++;
-	temp_passenger->reservation_number = reserve_seats;
-	cout<<"Your reservation number is ::== "<<reserve_seats;
-
-
-	temp_passenger->next = NULL;
-
-
-	//If the linked list is empty
-	if(start == NULL)
-	{
-		start = temp_passenger;
-	}
-	else
-	{
-		passenger *temp = start;
-		while(temp->next != NULL)
-		{
-			temp = temp->next;
-		}
-		temp->next = temp_passenger;
-	}
+      //If it is savings account
+    if(typeofacc=="Savings" && str == "NO"){
+    account ob(accholder_name,balance,typeofacc,pin);
+    total_saving_accounts++;
+    accts.push_back(ob);
+    std::cout << "\t\t|-----------------------------------------------|" << "\n";; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|     ACCOUNT CREATED SUCCESSFULLY              |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+    display_details(ob.account_number);
+    return true;
+    }
+    //If it is current account and balance is insufficient
+    if(typeofacc=="Current" && balance < 10000 && str == "NO")
+    {
+    std::cout << "\t\t|-----------------------------------------------|" << "\n";; 
+	std::cout << "\t\t|     INSUFFICIENT BALANCE                      |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+    return false;
+    }
+    //Current account with sufficient balance
+    else{
+    account ob(accholder_name,balance,typeofacc,pin);
+    accts.push_back(ob);
+    total_current_accounts++;
+    std::cout << "\t\t|-----------------------------------------------|" << "\n";; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|     ACCOUNT CREATED SUCCESSFULLY              |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+    display_details(ob.account_number);
+    return true;
+    }
+}
+long long int accnumber;
+bool change_pin()
+{
+    long long int accnum;
+    cout<<"Enter your account number : ";
+    cin>>accnum;
+    bool acc_exists = false;
+    for(auto it : accts)
+    {
+        if(it.account_number==accnum)
+        {
+            acc_exists = true;
+            string newpin;
+            string oldpin;
+            cout<<"Enter the old pin : ";
+            cin>>oldpin;
+            if(oldpin==it.pin)
+            {
+                cout<<"Enter new pin : ";
+                cin>>newpin;
+                it.pin = newpin;
+                display_details(it.account_number);
+                accnumber = it.account_number;
+                return true;
+            }
+            else{
+            cout<<"Invalid Pin. Try Again";
+            return false;
+            }
+        }
+    }
+    if(acc_exists == false){
+    cout<<"Account doesn't exists with given Account Number.";
+    return false;
+    }
 }
 
-void Flight :: cancel_ticket()
+bool deposit_into_account()
 {
-	int reservation_number;
-	cout << "Enter your reservation number: ";
-	cin >> reservation_number;
-	temp_passenger = start;
-	temp1 = start;
-	while(temp_passenger != NULL)
-	{
-		if(temp_passenger->reservation_number == reservation_number)
-		{
-			if(temp_passenger == start)
-			{
-				start = start->next;
-				seats[0] = 0;
-				cancel_tickets++;
-				delete temp_passenger;
-				break;
-			}
-			else
-			{
-				temp1->next = temp_passenger->next;
-				seats[temp_passenger->seat_number-1] = -1;
-				delete temp_passenger;
-				cancel_tickets++;
-				break;
-			}
-		}
-		else
-		{
-			temp1 = temp_passenger;
-			temp_passenger = temp_passenger->next;
-		}
-	}
+   long long int accnum;
+    cout<<"Enter your account number : ";
+    cin>>accnum;
+    bool acc_exists = false;
+    for(auto it : accts)
+    {
+        if(it.account_number==accnum)
+        {
+            acc_exists = true;
+            string pinfordepo;
+            cout<<"Enter the pin : ";
+            cin>>pinfordepo;
+            if(pinfordepo==it.pin)
+            {
+                int deposit_amount;
+                cout<<"Enter the amount you want to deposit : ";
+                cin>>deposit_amount;
+                it.balance = it.balance+deposit_amount;
+                cout<<"Your Updated details : ";
+                display_details(it.account_number);
+                return true;
+            }
+            else{
+            cout<<"Invalid Pin. Try Again";
+            return false;
+            }
+        }
+    }
+    if(acc_exists == false){
+    cout<<"Account doesn't exists with given Account Number.";
+    return false;
+    }
 }
 
-void Flight :: change_reservation()
-{
-	int currentseat_number , next_seat;
-	cout << " Please enter your seat number: ";
-	cin >> currentseat_number;
-	passenger *currentpass;
-	currentpass = start;
 
-	while(currentpass != NULL)
-	{
-		if ( currentpass->seat_number == currentseat_number)
-			break;
-		currentpass = currentpass->next;
-	}
-	cout << "Please choose another seat number from below.";
-		int x = 1;
-		while ( x < total_number_of_seats+1 )
-		{
-			if ( seats[x-1] == -1)
-			x++;
-			else
-			{
-			cout <<"| " << x << "|";
-			if ( x%10 == 0 )
-			cout << endl;
-			}
-		}
-	cin >> next_seat;
-	seats[currentpass->seat_number-1]=0;
-	currentpass->seat_number = next_seat;
-	seats[next_seat-1] = -1;
+
+bool withdraw_from_account()
+{
+    long long int accnum;
+    cout<<"Enter your account number : ";
+    cin>>accnum;
+    bool acc_exists = false;
+    for(auto it : accts)
+    {
+        if(it.account_number==accnum)
+        {
+            acc_exists = true;
+            string pinfordepo;
+            cout<<"Enter the pin : ";
+            cin>>pinfordepo;
+            if(pinfordepo==it.pin)
+            {
+                int withdrawl_amount;
+                cout<<"Enter the amount you want to deposit : ";
+                cin>>withdrawl_amount;
+                if(it.balance-withdrawl_amount > 0)
+                {
+                    it.balance = it.balance - withdrawl_amount;
+                    cout<<"Your Updated details : ";
+                    display_details(it.account_number);
+                    return true;
+                }
+                else{
+                    cout<<"Oooopssss!!!! Insufficient Balance";
+                }
+            }
+            else{
+            cout<<"Invalid Pin. Try Again";
+            return false;
+            }
+        }
+    }
+    if(acc_exists == false){
+    cout<<"Account doesn't exists with given Account Number.";
+    return false;
+    }
 }
 
-// void Flight :: get_seat_map()
-// {
-// 	int i = 1;
-// 	while ( i < size+1 )
-// 	{
-// 		if ( seat[i-1] == -1)
-// 		cout <<"| " << i << "|";
-// 		else
-// 		cout <<"| " << "X" << "|";
-// 		if ( i%10 == 0 )
-// 		cout << endl;
-// 		i++;
-// 	}
-// }
-
-void Flight :: passenger_details()
+bool balance_inquiry()
 {
-	int reservation_number;
-	cout << "Enter your reservation number: ";
-	cin >> reservation_number;
-	temp_passenger = start;
-	while(temp_passenger != NULL)
-	{
-		if(temp_passenger->reservation_number == reservation_number)
-		{
-			cout << "Reservation Number\t\tFirst Name\t\tLast Name\t\tID\t\tPhone Number\t\tSeat Number\t\tFood Menu" << endl;
-			cout << temp_passenger->reservation_number << "\t\t\t\t" << temp_passenger->fname << "\t\t\t\t" << temp_passenger->lname << "\t\t\t\t" << temp_passenger->ID << "\t\t\t\t" << temp_passenger->phone_number << "\t\t\t\t" << temp_passenger->seat_number << "\t\t\t\t" << temp_passenger->food_menu << endl;
-			break;
-		}
-		else
-		{
-			temp_passenger = temp_passenger->next;
-		}
-	}
+    long long int accnum;
+    cout<<"Enter your account number : ";
+    cin>>accnum;
+    bool acc_exists = false;
+    for(auto it : accts)
+    {
+        if(it.account_number==accnum)
+        {
+            cout<<"The balance in your account is : "<<it.balance;
+            return true;
+        }
+    }
+    if(acc_exists == false){
+    cout<<"Account doesn't exists with given Account Number.";
+    return false;
+    }
 }
 
-void Flight :: get_booking_details()
+bool close_account()
 {
-	temp_passenger = start;
-	cout << "Reservation Number\t\tFirst Name\t\tLast Name\t\tID\t\tPhone Number\t\tSeat Number\t\tFood Menu" << endl;
-	while(temp_passenger != NULL)
-	{
-		cout << temp_passenger->reservation_number << "\t\t\t\t" << temp_passenger->fname << "\t\t\t\t" << temp_passenger->lname << "\t\t\t\t" << temp_passenger->ID << "\t\t\t\t" << temp_passenger->phone_number << "\t\t\t\t" << temp_passenger->seat_number << "\t\t\t\t" << temp_passenger->food_menu << endl;
-		temp_passenger = temp_passenger->next;
-	}
+    long long int accnum;
+    cout<<"Enter your account number : ";
+    cin>>accnum;
+    bool acc_exists = false;
+    int count = 0;
+    for(auto it : accts)
+    {
+        count++;
+        if(it.account_number==accnum)
+        {
+            accts.erase(accts.begin()+count);
+            return true;
+        }
+    }
+    if(acc_exists == false){
+    cout<<"Account doesn't exists with given Account Number.";
+    return false;
+    }
+}
+
+bool view_account_details()
+{
+    for(auto it : accts)
+    {
+        display_details(it.account_number);
+    }
+    return true;
+} 
+
+void admin_menu()
+{
+	int option;
+    system("cls");
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+	std::cout << "\t\t|   Choose your option:                         |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|     1) View Total Number of Accounts          |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|     2) View Account Details                   |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+	cin>>option;
+
+    switch(option)
+    {
+        case 1:
+            cout<<"Total Number of Accounts : "<<accts.size();
+            break;
+        case 2:
+            view_account_details();
+            break;
+        default:
+            cout<<"Invalid Option";
+            break;
+    }   
+}
+
+void user_menu()
+{
+    system("cls");
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+	std::cout << "\t\t|   Choose your option:                         |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|     1) Create a New Account                   |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|     2) Change your pin                        |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+    std::cout << "\t\t|     3) Deposit Money                          |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+    std::cout << "\t\t|     4) Withdraw Money                         |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+    std::cout << "\t\t|     5) Balance Inquiry                        |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+    std::cout << "\t\t|     6) Close Account                          |" << "\n"; 
+    std::cout << "\t\t|                                               |" << "\n"; 
+    std::cout << "\t\t|     7) Display Account                        |" << "\n";
+	std::cout << "\t\t|                                               |" << "\n"; 
+    std::cout << "\t\t|     8) Exit                                   |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+    int choice;
+    do{
+        cout<<"\nEnter your choice : ";
+        cin>>choice;
+        if(choice==1){
+        bool ans = create_account(accts);
+        }
+        else if(choice==2)
+        {
+            bool pinchanged = change_pin();
+        }
+        else if(choice==3)
+        {
+            bool successfuldeposit = deposit_into_account();
+        }
+        else if(choice==4)
+        {
+            bool successfulwithdraw = withdraw_from_account();
+        }
+        else if(choice==5)
+        {
+            bool successinquiry = balance_inquiry();
+        }
+        else if(choice==6)
+        {
+            bool successful_close_account = close_account();
+        }
+        else if(choice==7)
+        {
+            long long int account_number;
+            cout<<"Enter the account number for details to be displayed : ";
+            cin>>account_number;
+            display_details(account_number);
+        }
+        else if(choice==8)
+        {
+            exit(0);
+        }
+    }while(choice!=8);
+
 }
 
 void welcome()
 {
-	std::cout << "\t\t|------------------------------------------------------------------|" << "\n";
-	std::cout << "\t\t|                                                                  |" << "\n"; 
-	std::cout << "\t\t|     WELCOME TO YRNCOLLO AIRLINE FLIGHT RESERVATION SYSTEM        |" << "\n";
-	std::cout << "\t\t|                                                                  |" << "\n"; 
-	std::cout << "\t\t|------------------------------------------------------------------|" << "\n";
-	std::cout << "\t\t|          Choose your option:                                     |" << "\n"; 
-	std::cout << "\t\t|------------------------------------------------------------------|" << "\n";
-	std::cout << "\t\t|                                                                  |" << "\n";  
-	std::cout << "\t\t|          1) BOOK TICKET                                          |" << "\n"; 
-	std::cout << "\t\t|                                                                  |" << "\n"; 
-	std::cout << "\t\t|          2) CANCEL TICKET                                        |" << "\n"; 
-	std::cout << "\t\t|                                                                  |" << "\n";
-	std::cout << "\t\t|          3) CHANGE RESERVATION                                   |" << "\n"; 
-	std::cout << "\t\t|                                                                  |" << "\n";
-	std::cout << "\t\t|          4) PASSENGER DETAILS                                    |" << "\n"; 
-	std::cout << "\t\t|                                                                  |" << "\n";
-	std::cout << "\t\t|          5) GET BOOKING DETAILS                                  |" << "\n"; 
-	std::cout << "\t\t|                                                                  |" << "\n";
-	std::cout << "\t\t|          6) EXIT                                                 |" << "\n"; 
-	std::cout << "\t\t|------------------------------------------------------------------|" << "\n";
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|     WELCOME TO YRNCOLLO BANKING SYSTEM        |" << "\n";
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+	std::cout << "\t\t|\t Choose your option:\t                |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|\t\t 1) ADMINISTRATOR               |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|\t\t 2) USER                        |" << "\n"; 
+	std::cout << "\t\t|                                               |" << "\n"; 
+	std::cout << "\t\t|\t\t 3) EXIT                        |" << "\n"; 
+	std::cout << "\t\t|-----------------------------------------------|" << "\n";
 
 	int choice;
-	do
-	{
-		cout<<"Enter your choice: ";
-		cin>>choice;
-		switch(choice)
-		{
-			case 1:system("CLS");
-				flight.book_ticket();
-				break;
-			case 2:system("CLS");
-				flight.cancel_ticket();
-				break;
-			case 3:system("CLS");
-				flight.change_reservation();
-				break;
-			case 4:system("CLS");
-				flight.passenger_details();
-				break;
-			case 5:system("CLS");
-				flight.get_booking_details();
-				break;
-			case 6 : system("CLS");
-				exit(0);
-				break;
-			default:system("CLS");
-				cout<<"Invalid choice"<<endl;
-				break;
-		}
-	}while(choice!=7);
+	std::cout << "\n\nEnter: ";
+	std::cin >> choice;	
+    if(choice==1)
+    admin_menu();
+    else if(choice==2){
+    user_menu();
+    display_details(accnumber);
+    }
+    else if(choice==3)
+    exit(0);
+    else
+    system("pause");
 }
-
 int main()
 {
-    welcome();
+	welcome();
     return 0;
 }
+
